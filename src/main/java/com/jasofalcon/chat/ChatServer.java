@@ -24,12 +24,15 @@ public class ChatServer extends WebSocketServer {
 
     private HashMap<WebSocket, User> users;
 
+    private HashMap<User, WebSocket> usersToWS;
+
     private Set<WebSocket> conns;
 
     private ChatServer(int port) {
         super(new InetSocketAddress(port));
         conns = new HashSet<>();
         users = new HashMap<>();
+        usersToWS = new HashMap<>();
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ChatServer extends WebSocketServer {
 
             switch (msg.getType()) {
                 case USER_JOINED:
-                    addUser(new User(msg.getUser().getName()), conn);
+                    addUser(new User(msg.getFrom().getName()), conn);
                     break;
                 case USER_LEFT:
                     removeUser(conn);
@@ -71,8 +74,8 @@ public class ChatServer extends WebSocketServer {
                     broadcastMessage(msg);
             }
 
-            System.out.println("Message from user: " + msg.getUser() + ", text: " + msg.getData() + ", type:" + msg.getType());
-            logger.info("Message from user: " + msg.getUser() + ", text: " + msg.getData());
+            System.out.println("Message from user: " + msg.getFrom() + ", text: " + msg.getData() + ", type:" + msg.getType());
+            logger.info("Message from user: " + msg.getFrom() + ", text: " + msg.getData());
         } catch (IOException e) {
             logger.error("Wrong message format.");
             // return error message to user
@@ -93,8 +96,12 @@ public class ChatServer extends WebSocketServer {
         ObjectMapper mapper = new ObjectMapper();
         try {
             String messageJson = mapper.writeValueAsString(msg);
-            for (WebSocket sock : conns) {
-                sock.send(messageJson);
+            WebSocket to = usersToWS.get(msg.getTo());
+            if (to != null)
+            	to.send(messageJson);
+            else {
+	            for (WebSocket sock : conns)
+	                sock.send(messageJson);
             }
         } catch (JsonProcessingException e) {
             logger.error("Cannot convert message to json.");
@@ -103,19 +110,21 @@ public class ChatServer extends WebSocketServer {
 
     private void addUser(User user, WebSocket conn) throws JsonProcessingException {
         users.put(conn, user);
+        usersToWS.put(user, conn);
         acknowledgeUserJoined(user, conn);
         broadcastUserActivityMessage(MessageType.USER_JOINED);
     }
 
     private void removeUser(WebSocket conn) throws JsonProcessingException {
-        users.remove(conn);
+        User user = users.remove(conn);
+        usersToWS.remove(user);
         broadcastUserActivityMessage(MessageType.USER_LEFT);
     }
 
     private void acknowledgeUserJoined(User user, WebSocket conn) throws JsonProcessingException {
         Message message = new Message();
         message.setType(MessageType.USER_JOINED_ACK);
-        message.setUser(user);
+        message.setFrom(user);
         conn.send(new ObjectMapper().writeValueAsString(message));
     }
 

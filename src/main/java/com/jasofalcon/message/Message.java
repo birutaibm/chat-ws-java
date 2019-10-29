@@ -9,7 +9,8 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Message implements Serializable{
 
-    private User user;
+    private User from;
+    private User to;
     private MessageType type;
     private String data;
 
@@ -21,15 +22,23 @@ public class Message implements Serializable{
         this.type = type;
     }
 
-    public User getUser() {
-        return user;
-    }
+    public User getFrom() {
+		return from;
+	}
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+	public void setFrom(User from) {
+		this.from = from;
+	}
 
-    public void setData(String data) {
+	public User getTo() {
+		return to;
+	}
+
+	public void setTo(User to) {
+		this.to = to;
+	}
+
+	public void setData(String data) {
         this.data = data;
     }
 
