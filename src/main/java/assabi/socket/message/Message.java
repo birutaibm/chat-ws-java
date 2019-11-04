@@ -3,8 +3,11 @@ package assabi.socket.message;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import assabi.dto.CharacterDTO;
 import assabi.dto.DistanceOptionDTO;
+import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.dto.ScenarioDTO;
 import assabi.dto.WeightCreationDTO;
 import lombok.Getter;
@@ -13,10 +16,18 @@ import lombok.Setter;
 import lombok.ToString;
 
 public interface Message {
+	default String toJsonString() {
+		try {
+			return MessageWrapper.mapper.writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
-	public class Logged implements Message {
-		private Long userId;
-		private String name;
+	public class Login implements Message {
+		private String login;
+		private String password;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class CreateApp implements Message {
@@ -44,9 +55,13 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class ParticipationIntesion implements Message {
-		private Long group;
-		private Long character;
-		private Long actor;
+		private Long application;
+		private Long groupId;
+		private String groupName;
+		private Long characterId;
+		private String characterName;
+		private Long actorId;
+		private String actorName;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class ParticipationApproval implements Message {
@@ -73,7 +88,7 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class Distances implements Message {
-		private DistanceOptionDTO distances;
+		private List<DistanceOptionDTO> distances;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class Waiting implements Message {
@@ -81,11 +96,11 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class GoAhead implements Message {
-		private Long userId;
+		private Long appId;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class GroupChange implements Message {
-		private Long userId;
-		private Map<String, long[]> groups; // $groupName => [$characterIds]
+		private Long appId;
+		private Map<String, List<InterpretationDTO>> groups; // $groupName => [$interpretationDTOs(com actorId)]
 	}
 }

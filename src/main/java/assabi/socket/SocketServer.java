@@ -31,7 +31,7 @@ public final class SocketServer extends WebSocketServer {
         conns = new HashSet<>();
         users = new UserList();
         processors = new ProcessorRegistry(this);
-        processors.registry(Message.Logged.class, new Processor.Logged());
+        processors.registry(Message.Login.class, new Processor.Login());
     }
 
     @Override
@@ -82,5 +82,9 @@ public final class SocketServer extends WebSocketServer {
             port = 9000;
         }
         new SocketServer(port).start();
+	}
+
+	public UserList getUserList() {
+		return users;
 	}
 }
