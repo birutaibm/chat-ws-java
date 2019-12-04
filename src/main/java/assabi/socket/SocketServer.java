@@ -13,8 +13,6 @@ import org.java_websocket.server.WebSocketServer;
 import com.jasofalcon.chat.ChatServer;
 
 import assabi.socket.message.Interpretor;
-import assabi.socket.message.Message;
-import assabi.socket.message.processor.Processor;
 import assabi.socket.message.processor.ProcessorRegistry;
 import assabi.socket.user.User;
 import assabi.socket.user.UserList;
@@ -31,7 +29,6 @@ public final class SocketServer extends WebSocketServer {
         conns = new HashSet<>();
         users = new UserList();
         processors = new ProcessorRegistry(this);
-        processors.registry(Message.Login.class, new Processor.Login());
     }
 
     @Override

@@ -1,19 +1,14 @@
 package assabi.socket.message;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-import assabi.socket.exceptions.RegistryConflict;
-import assabi.socket.exceptions.RegistryConflictException;
+import assabi.socket.utils.RegistryMap;
 
 public final class MessageTypeRegistry {
 	private static final MessageTypeRegistry instance = new MessageTypeRegistry();
-	private final Map<String, Class<? extends Message>> registry;
+	private final RegistryMap<String, Class<? extends Message>> registry;
 
 	private MessageTypeRegistry() {
 		super();
-		registry = new HashMap<>();
+		registry = new RegistryMap<>();
 		registry(Message.AppInfo.class);
 		registry(Message.ApproveWeights.class);
 		registry(Message.CreateApp.class);
@@ -34,19 +29,14 @@ public final class MessageTypeRegistry {
 	}
 
 	public void registry(String name, Class<? extends Message> type) {
-		Objects.requireNonNull(name);
-		Objects.requireNonNull(type);
-		if (registry.containsKey(name) && !type.equals(registry.get(name)))
-			new RegistryConflict(name, type, registry.get(name));
-		registry.put(name, type);
+		registry.registry(name, type);
 	}
 
 	public Class<? extends Message> get(String name) {
-		Objects.requireNonNull(name);
-		return Objects.requireNonNull(registry.get(name));
+		return registry.get(name);
 	}
 
-	public void registry(Class<? extends Message> type) throws RegistryConflictException {
+	public void registry(Class<? extends Message> type) {
 		registry(type.getSimpleName(), type);
 	}
 }
