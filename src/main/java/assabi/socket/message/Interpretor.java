@@ -14,7 +14,7 @@ public final class Interpretor {
 
 	public static Message read(String message) throws JsonParseException, JsonMappingException, IOException {
 		MessageWrapper instance = mapper.readValue(message, MessageWrapper.class);
-		return mapper.readValue(instance.getData(), instance.getDataType());
+		return mapper.readValue(instance.getData(), instance.getDataClass());
 	}
 
 	public static String write(Message message) throws JsonProcessingException {
@@ -33,6 +33,7 @@ public final class Interpretor {
 		
 		try {
 			String strMessage = write(login);
+			System.out.println(strMessage);
 			Message reconstructedMsg = read(strMessage);
 			if (login.equals(reconstructedMsg)) {
 				System.out.println(login + " equals " + reconstructedMsg);
