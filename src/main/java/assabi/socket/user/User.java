@@ -4,8 +4,8 @@ import org.java_websocket.WebSocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import assabi.socket.message.Interpretor;
 import assabi.socket.message.Message;
-import assabi.socket.message.MessageWrapper;
 import lombok.Data;
 import lombok.Getter;
 
@@ -40,7 +40,7 @@ public class User {
 		public void setContent(Message.ParticipationApproved content) {
 			this.content = content;
 			try {
-				text = MessageWrapper.write(content);
+				text = Interpretor.write(content);
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}

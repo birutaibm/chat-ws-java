@@ -10,6 +10,7 @@ import assabi.dto.DistanceOptionDTO;
 import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.dto.ScenarioDTO;
 import assabi.dto.WeightCreationDTO;
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -18,13 +19,13 @@ import lombok.ToString;
 public interface Message {
 	default String toJsonString() {
 		try {
-			return MessageWrapper.mapper.writeValueAsString(this);
+			return Interpretor.mapper.writeValueAsString(this);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	@Getter @Setter @RequiredArgsConstructor @ToString
+	@Data
 	public class Login implements Message {
 		private String login;
 		private String password;

@@ -12,8 +12,8 @@ import org.java_websocket.server.WebSocketServer;
 
 import com.jasofalcon.chat.ChatServer;
 
+import assabi.socket.message.Interpretor;
 import assabi.socket.message.Message;
-import assabi.socket.message.MessageWrapper;
 import assabi.socket.message.processor.Processor;
 import assabi.socket.message.processor.ProcessorRegistry;
 import assabi.socket.user.User;
@@ -63,7 +63,7 @@ public final class SocketServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         try {
-        	processors.process(MessageWrapper.read(message), conn);
+        	processors.process(Interpretor.read(message), conn);
         } catch (Exception e) {
             logger.error("Wrong message format.");
             // return error message to user

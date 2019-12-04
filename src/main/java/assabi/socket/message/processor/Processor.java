@@ -7,9 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.java_websocket.WebSocket;
 
@@ -22,12 +20,10 @@ import assabi.dto.ParticipationDTO;
 import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.dto.WeightCreationDTO;
 import assabi.socket.SocketServer;
+import assabi.socket.message.Interpretor;
 import assabi.socket.message.Message;
-import assabi.socket.message.Message.ParticipationApproved;
-import assabi.socket.message.MessageWrapper;
 import assabi.socket.restClient.RestClient;
 import assabi.socket.user.User;
-import assabi.socket.user.User.Buffer;
 import assabi.socket.user.UserList;
 
 public interface Processor<M extends Message> {
@@ -39,7 +35,7 @@ public interface Processor<M extends Message> {
 		public void process(Message.Login message, WebSocket connection, SocketServer server) {
 			try {
 				String response = api.post("/login", message.toJsonString());
-				HashMap<String, Object> map = MessageWrapper.mapper.readValue(response, new HashMap<String, Object>().getClass());
+				HashMap<String, Object> map = Interpretor.mapper.readValue(response, new HashMap<String, Object>().getClass());
 				String name = message.getLogin();
 				if (map.containsKey("adminId")) {
 					User user = new User(connection,
@@ -57,12 +53,12 @@ public interface Processor<M extends Message> {
 					
 					UserList userList = server.getUserList();
 					Message.AppInfo appInfo = userList.getAppInfo(appId);
-					connection.send(MessageWrapper.write(appInfo));
+					connection.send(Interpretor.write(appInfo));
 					
 					Message.NewActor newUser = new Message.NewActor();
 					newUser.setActorId(actorId);
 					newUser.setActorName(name);
-					String wrap = MessageWrapper.write(newUser);
+					String wrap = Interpretor.write(newUser);
 					
 					userList.getGroupUsers(appId, UserList.ADMIN_GROUP_ID)
 						.findFirst()
@@ -82,9 +78,9 @@ public interface Processor<M extends Message> {
 			String response = api.post("/applications", message.toJsonString());
 			server.getUserList().getFromConnection(connection).ifPresent(user -> {
 				try {
-					Message.AppInfo appInfo = MessageWrapper.mapper.readValue(response, Message.AppInfo.class);
+					Message.AppInfo appInfo = Interpretor.mapper.readValue(response, Message.AppInfo.class);
 					server.getUserList().setAdmin(user, appInfo);
-					connection.send(MessageWrapper.write(appInfo));
+					connection.send(Interpretor.write(appInfo));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -97,7 +93,7 @@ public interface Processor<M extends Message> {
 		@Override
 		public void process(Message.ParticipationIntesion message, WebSocket connection, SocketServer server) {
 			try {
-				String wrap = MessageWrapper.write(message);
+				String wrap = Interpretor.write(message);
 				server.getUserList().getGroupUsers(message.getApplication(), UserList.ADMIN_GROUP_ID)
 					.findFirst()
 					.map(User::getConnection)
@@ -114,20 +110,20 @@ public interface Processor<M extends Message> {
 		public void process(Message.ParticipationApproval message, WebSocket connection, SocketServer server) {
 			List<ParticipationDTO> dtos = approvedDTOs(message);
 			try {
-				String response = api.post("/participations", MessageWrapper.mapper.writeValueAsString(dtos));
-				HashMap<String, String> map = MessageWrapper.mapper.readValue(response, new HashMap<String, String>().getClass());
+				String response = api.post("/participations", Interpretor.mapper.writeValueAsString(dtos));
+				HashMap<String, String> map = Interpretor.mapper.readValue(response, new HashMap<String, String>().getClass());
 				Map<Long, List<Message.ParticipationIntesion>> savedIntensionsByGroups = message
 						.getApprove().stream()
 						.collect(Collectors.groupingBy(Message.ParticipationIntesion::getGroupId));
 				if (map.containsKey("fails")) {
-					List<ParticipationDTO> fails = (List<ParticipationDTO>) MessageWrapper.mapper.readValue(map.get("fails"), dtos.getClass());
+					List<ParticipationDTO> fails = (List<ParticipationDTO>) Interpretor.mapper.readValue(map.get("fails"), dtos.getClass());
 					fails.forEach(dto -> {
 						Long group = dto.getGroup();
 						savedIntensionsByGroups.get(group)
 							.removeIf(intension -> sameInterpretation(dto, intension));
 					});
 				}
-				List<Map<String, ?>> savedParticipations = MessageWrapper.mapper.readValue(map.get("success"), List.class);
+				List<Map<String, ?>> savedParticipations = Interpretor.mapper.readValue(map.get("success"), List.class);
 				Map<Long, Long> actorToParticipationMap = savedParticipations.stream()
 					.map(this::getActorParticipationIds)
 					.flatMap(item -> item.entrySet().stream())
@@ -145,12 +141,8 @@ public interface Processor<M extends Message> {
 		private List<ParticipationDTO> approvedDTOs(Message.ParticipationApproval message) {
 			return message.getApprove().stream()
 				.map(intension -> {
-					ParticipationDTO dto = new ParticipationDTO();
-					dto.setGroup(intension.getGroupId());
-					InterpretationDTO interpretation = new InterpretationDTO();
-					interpretation.setActor(intension.getActorId());
-					interpretation.setCharacter(intension.getCharacterId());
-					dto.setInterpretation(interpretation);
+					InterpretationDTO interpretation = new InterpretationDTO(intension.getActorId(), intension.getCharacterId());
+					ParticipationDTO dto = new ParticipationDTO(intension.getGroupId(), interpretation);
 					return dto;
 				}).collect(Collectors.toList());
 		}
@@ -210,7 +202,7 @@ public interface Processor<M extends Message> {
 		@Override
 		public void process(Message.Weights message, WebSocket connection, SocketServer server) {
 			try {
-				String wrap = MessageWrapper.write(message);
+				String wrap = Interpretor.write(message);
 				server.getUserList()
 					.getAdmin(message.getUserId(), message.getWeights().getGroup())
 					.map(User::getConnection)
@@ -233,9 +225,9 @@ public interface Processor<M extends Message> {
 
 		private Long postWeight(WeightCreationDTO weights) {
 			try {
-				String response = api.post("/weights", MessageWrapper.mapper.writeValueAsString(weights));
+				String response = api.post("/weights", Interpretor.mapper.writeValueAsString(weights));
 				Map<String, ?> map = new HashMap<>();
-				map = MessageWrapper.mapper.readValue(response, map.getClass());
+				map = Interpretor.mapper.readValue(response, map.getClass());
 				return (Long) map.get("id");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -247,7 +239,7 @@ public interface Processor<M extends Message> {
 			try {
 				String response = api.get("/weights/"+weight+"/distances");
 				ArrayList<DistanceOptionDTO> list = new ArrayList<>();
-				list = MessageWrapper.mapper.readValue(response, list.getClass());
+				list = Interpretor.mapper.readValue(response, list.getClass());
 				Message.Distances distances = new Message.Distances();
 				distances.setDistances(list);
 				return distances;
@@ -260,7 +252,7 @@ public interface Processor<M extends Message> {
 		private void sendDistances(SocketServer server, Message.Distances distance, Long adminId, long groupId) {
 			try {
 				UserList userList = server.getUserList();
-				String wrap = MessageWrapper.write(distance);
+				String wrap = Interpretor.write(distance);
 				userList.getAppsAdministratedBy(adminId)
 					.flatMap(app -> userList.getGroupUsers(app, groupId))
 					.map(User::getConnection)
@@ -307,10 +299,10 @@ public interface Processor<M extends Message> {
 				throws JsonProcessingException, IOException, JsonParseException, JsonMappingException {
 			String endPoint = "applications/"+message.getAppId()+"/mix_groups";
 			Map<String, List<InterpretationDTO>> groups = message.getGroups();
-			String body = MessageWrapper.mapper.writeValueAsString(groups);
+			String body = Interpretor.mapper.writeValueAsString(groups);
 			String response = api.post(endPoint, body);
 			Map<String, ?> phase = new HashMap<>();
-			phase = MessageWrapper.mapper.readValue(response, phase.getClass());
+			phase = Interpretor.mapper.readValue(response, phase.getClass());
 			return (Collection<?>) phase.get("groups");
 		}
 
