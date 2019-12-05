@@ -43,8 +43,8 @@ public interface Processor<M extends Message> {
 							name);
 					server.addUser(user);
 				} else {
-					Long actorId = (Long) map.get("actor");
-					Long appId = (Long) map.get("appId");
+					Long actorId = ((Number) map.get("actor")).longValue();
+					Long appId = ((Number) map.get("appId")).longValue();
 					
 					User user = new User(connection,
 							actorId,
@@ -193,7 +193,7 @@ public interface Processor<M extends Message> {
 			Long participationId = (Long) participation.get("id");
 			Map<String, ?> interpretation = (Map<String, ?>) participation.get("interpretation");
 			Map<String, ?> actor = (Map<String, ?>) interpretation.get("actor");
-			Long actorId = (Long) actor.get("id");
+			Long actorId = ((Number) actor.get("id")).longValue();
 			return Collections.singletonMap(actorId, participationId);
 		}
 	}
@@ -228,7 +228,7 @@ public interface Processor<M extends Message> {
 				String response = api.post("/weights", Interpretator.mapper.writeValueAsString(weights));
 				Map<String, ?> map = new HashMap<>();
 				map = Interpretator.mapper.readValue(response, map.getClass());
-				return (Long) map.get("id");
+				return ((Number) map.get("id")).longValue();
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
@@ -308,7 +308,7 @@ public interface Processor<M extends Message> {
 
 		private void configureGroup(Message.GroupChange message, SocketServer server, Map<String, ?> group) {
 			HashMap<String, String> participants = new HashMap<>();
-			Long groupId = (Long) group.get("id");
+			Long groupId = ((Number) group.get("id")).longValue();
 			String groupName = (String) group.get("name");
 			Collection<?> participations = (Collection<?>) group.get("participations");
 			participations.stream().map(participation ->
@@ -329,10 +329,10 @@ public interface Processor<M extends Message> {
 
 		private Map<String, Long> extractParticipationInfo(SocketServer server, HashMap<String, String> participants,
 				Map<String, ?> participation) {
-			Long participationId = (Long) participation.get("id");
+			Long participationId = ((Number) participation.get("id")).longValue();
 			Map<String, ?> interpretation = (Map<String, ?>) participation.get("interpretation");
 			Map<String, ?> map = (Map<String, ?>) interpretation.get("actor");
-			Long actorId = (Long) map.get("id");
+			Long actorId = ((Number) map.get("id")).longValue();
 			server.getUserList().getFromId(actorId)
 				.map(user -> {
 					String actor = user.getName();
