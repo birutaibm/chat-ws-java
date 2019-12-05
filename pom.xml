@@ -28,7 +28,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.jasofalcon.chat.ChatServer</mainClass>
+                            <mainClass>assabi.socket.SocketServer</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
