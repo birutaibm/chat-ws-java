@@ -59,10 +59,12 @@ public final class SocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        System.out.println("Received message " + message);
         try {
         	processors.process(Interpretor.read(message), conn);
         } catch (Exception e) {
             logger.error("Wrong message format.");
+		e.printStackTrace();
             // return error message to user
         }
     }
