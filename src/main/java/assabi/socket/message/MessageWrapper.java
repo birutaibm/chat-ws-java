@@ -31,6 +31,7 @@ public class MessageWrapper {
 
 	@SuppressWarnings("unused") // used by jackson
 	private void setDataType(String dataType) {
+		System.out.println("Search for "+dataType+" in "+knownTypes);
 		setDataClass(knownTypes.get(dataType));
 	}
 
