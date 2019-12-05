@@ -13,6 +13,7 @@ public final class Interpretator {
 	public static Message read(String message) throws JsonParseException, JsonMappingException, IOException {
 		MessageWrapper instance = mapper.readValue(message, MessageWrapper.class);
 		String strMsg = mapper.writeValueAsString(instance.getData());
+		System.out.println("Reading "+strMsg+" as "+instance.getDataClass());
 		return mapper.readValue(strMsg, instance.getDataClass());
 	}
 
