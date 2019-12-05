@@ -19,7 +19,7 @@ import lombok.ToString;
 public interface Message {
 	default String toJsonString() {
 		try {
-			return Interpretor.mapper.writeValueAsString(this);
+			return Interpretator.mapper.writeValueAsString(this);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 			return null;

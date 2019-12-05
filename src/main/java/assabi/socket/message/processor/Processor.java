@@ -20,7 +20,7 @@ import assabi.dto.ParticipationDTO;
 import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.dto.WeightCreationDTO;
 import assabi.socket.SocketServer;
-import assabi.socket.message.Interpretor;
+import assabi.socket.message.Interpretator;
 import assabi.socket.message.Message;
 import assabi.socket.restClient.RestClient;
 import assabi.socket.user.User;
@@ -35,7 +35,7 @@ public interface Processor<M extends Message> {
 		public void process(Message.Login message, WebSocket connection, SocketServer server) {
 			try {
 				String response = api.post("/login", message.toJsonString());
-				HashMap<String, Object> map = Interpretor.mapper.readValue(response, new HashMap<String, Object>().getClass());
+				HashMap<String, Object> map = Interpretator.mapper.readValue(response, new HashMap<String, Object>().getClass());
 				String name = message.getLogin();
 				if (map.containsKey("adminId")) {
 					User user = new User(connection,
@@ -53,12 +53,12 @@ public interface Processor<M extends Message> {
 					
 					UserList userList = server.getUserList();
 					Message.AppInfo appInfo = userList.getAppInfo(appId);
-					connection.send(Interpretor.write(appInfo));
+					connection.send(Interpretator.write(appInfo));
 					
 					Message.NewActor newUser = new Message.NewActor();
 					newUser.setActorId(actorId);
 					newUser.setActorName(name);
-					String wrap = Interpretor.write(newUser);
+					String wrap = Interpretator.write(newUser);
 					
 					userList.getGroupUsers(appId, UserList.ADMIN_GROUP_ID)
 						.findFirst()
@@ -78,9 +78,9 @@ public interface Processor<M extends Message> {
 			String response = api.post("/applications", message.toJsonString());
 			server.getUserList().getFromConnection(connection).ifPresent(user -> {
 				try {
-					Message.AppInfo appInfo = Interpretor.mapper.readValue(response, Message.AppInfo.class);
+					Message.AppInfo appInfo = Interpretator.mapper.readValue(response, Message.AppInfo.class);
 					server.getUserList().setAdmin(user, appInfo);
-					connection.send(Interpretor.write(appInfo));
+					connection.send(Interpretator.write(appInfo));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -93,7 +93,7 @@ public interface Processor<M extends Message> {
 		@Override
 		public void process(Message.ParticipationIntesion message, WebSocket connection, SocketServer server) {
 			try {
-				String wrap = Interpretor.write(message);
+				String wrap = Interpretator.write(message);
 				server.getUserList().getGroupUsers(message.getApplication(), UserList.ADMIN_GROUP_ID)
 					.findFirst()
 					.map(User::getConnection)
@@ -110,20 +110,20 @@ public interface Processor<M extends Message> {
 		public void process(Message.ParticipationApproval message, WebSocket connection, SocketServer server) {
 			List<ParticipationDTO> dtos = approvedDTOs(message);
 			try {
-				String response = api.post("/participations", Interpretor.mapper.writeValueAsString(dtos));
-				HashMap<String, String> map = Interpretor.mapper.readValue(response, new HashMap<String, String>().getClass());
+				String response = api.post("/participations", Interpretator.mapper.writeValueAsString(dtos));
+				HashMap<String, String> map = Interpretator.mapper.readValue(response, new HashMap<String, String>().getClass());
 				Map<Long, List<Message.ParticipationIntesion>> savedIntensionsByGroups = message
 						.getApprove().stream()
 						.collect(Collectors.groupingBy(Message.ParticipationIntesion::getGroupId));
 				if (map.containsKey("fails")) {
-					List<ParticipationDTO> fails = (List<ParticipationDTO>) Interpretor.mapper.readValue(map.get("fails"), dtos.getClass());
+					List<ParticipationDTO> fails = (List<ParticipationDTO>) Interpretator.mapper.readValue(map.get("fails"), dtos.getClass());
 					fails.forEach(dto -> {
 						Long group = dto.getGroup();
 						savedIntensionsByGroups.get(group)
 							.removeIf(intension -> sameInterpretation(dto, intension));
 					});
 				}
-				List<Map<String, ?>> savedParticipations = Interpretor.mapper.readValue(map.get("success"), List.class);
+				List<Map<String, ?>> savedParticipations = Interpretator.mapper.readValue(map.get("success"), List.class);
 				Map<Long, Long> actorToParticipationMap = savedParticipations.stream()
 					.map(this::getActorParticipationIds)
 					.flatMap(item -> item.entrySet().stream())
@@ -202,7 +202,7 @@ public interface Processor<M extends Message> {
 		@Override
 		public void process(Message.Weights message, WebSocket connection, SocketServer server) {
 			try {
-				String wrap = Interpretor.write(message);
+				String wrap = Interpretator.write(message);
 				server.getUserList()
 					.getAdmin(message.getUserId(), message.getWeights().getGroup())
 					.map(User::getConnection)
@@ -225,9 +225,9 @@ public interface Processor<M extends Message> {
 
 		private Long postWeight(WeightCreationDTO weights) {
 			try {
-				String response = api.post("/weights", Interpretor.mapper.writeValueAsString(weights));
+				String response = api.post("/weights", Interpretator.mapper.writeValueAsString(weights));
 				Map<String, ?> map = new HashMap<>();
-				map = Interpretor.mapper.readValue(response, map.getClass());
+				map = Interpretator.mapper.readValue(response, map.getClass());
 				return (Long) map.get("id");
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -239,7 +239,7 @@ public interface Processor<M extends Message> {
 			try {
 				String response = api.get("/weights/"+weight+"/distances");
 				ArrayList<DistanceOptionDTO> list = new ArrayList<>();
-				list = Interpretor.mapper.readValue(response, list.getClass());
+				list = Interpretator.mapper.readValue(response, list.getClass());
 				Message.Distances distances = new Message.Distances();
 				distances.setDistances(list);
 				return distances;
@@ -252,7 +252,7 @@ public interface Processor<M extends Message> {
 		private void sendDistances(SocketServer server, Message.Distances distance, Long adminId, long groupId) {
 			try {
 				UserList userList = server.getUserList();
-				String wrap = Interpretor.write(distance);
+				String wrap = Interpretator.write(distance);
 				userList.getAppsAdministratedBy(adminId)
 					.flatMap(app -> userList.getGroupUsers(app, groupId))
 					.map(User::getConnection)
@@ -260,7 +260,7 @@ public interface Processor<M extends Message> {
 				userList.getFromId(adminId)
 					.map(User::getConnection)
 					.ifPresent(admin -> admin.send(wrap));
-			} catch (JsonProcessingException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -299,10 +299,10 @@ public interface Processor<M extends Message> {
 				throws JsonProcessingException, IOException, JsonParseException, JsonMappingException {
 			String endPoint = "applications/"+message.getAppId()+"/mix_groups";
 			Map<String, List<InterpretationDTO>> groups = message.getGroups();
-			String body = Interpretor.mapper.writeValueAsString(groups);
+			String body = Interpretator.mapper.writeValueAsString(groups);
 			String response = api.post(endPoint, body);
 			Map<String, ?> phase = new HashMap<>();
-			phase = Interpretor.mapper.readValue(response, phase.getClass());
+			phase = Interpretator.mapper.readValue(response, phase.getClass());
 			return (Collection<?>) phase.get("groups");
 		}
 
