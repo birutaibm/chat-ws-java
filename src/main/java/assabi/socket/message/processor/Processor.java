@@ -39,7 +39,7 @@ public interface Processor<M extends Message> {
 				String name = message.getLogin();
 				if (map.containsKey("adminId")) {
 					User user = new User(connection,
-							(Long) map.get("adminId"),
+							(long) map.get("adminId"),
 							name);
 					server.addUser(user);
 				} else {
