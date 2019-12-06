@@ -69,11 +69,11 @@ public class UserList {
 	}
 
 	public void setAdmin(User user, AppInfo appInfo) {
-		appInfos.put(appInfo.getAppId(), appInfo);
+		appInfos.put(appInfo.getId(), appInfo);
 		List<Long> adminList = Collections.singletonList(user.getUserId());
 		Map<Long, List<Long>> adminMap = new HashMap<>();
 		adminMap.put(ADMIN_GROUP_ID, adminList);
-		appUserGroups.put(appInfo.getAppId(), adminMap);
+		appUserGroups.put(appInfo.getId(), adminMap);
 	}
 
 	public Optional<User> getAdmin(Long actorId, Long groupId) {

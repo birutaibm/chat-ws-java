@@ -39,7 +39,7 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class AppInfo implements Message {
-		private Long appId;
+		private Long id;
 		private ScenarioDTO scenario;
 		private List<Group> groups;
 		@Getter @Setter @RequiredArgsConstructor @ToString
