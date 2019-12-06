@@ -10,6 +10,7 @@ import assabi.dto.DistanceOptionDTO;
 import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.dto.ScenarioDTO;
 import assabi.dto.WeightCreationDTO;
+import assabi.dto.ExistingApplicationDTO;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,17 +38,7 @@ public interface Message {
 		private String name;
 		private Map<String, Integer> phases;
 	}
-	@Getter @Setter @RequiredArgsConstructor @ToString
-	public class AppInfo implements Message {
-		private Long id;
-		private ScenarioDTO scenario;
-		private List<Group> groups;
-		@Getter @Setter @RequiredArgsConstructor @ToString
-		private class Group {
-			private String name;
-			private Long id;
-			private List<CharacterDTO> characters; // Character do assabi-back
-		}
+	public class AppInfo extends ExistingApplicationDTO implements Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class NewActor implements Message {
