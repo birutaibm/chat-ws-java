@@ -18,6 +18,7 @@ public final class Interpretator {
 	}
 
 	public static String write(Message message) throws IOException {
+		System.out.println("Writing "+message);
 		String strMsg = mapper.writeValueAsString(message);
 		Map<String, Object> mapMsg = mapper.readValue(strMsg, Map.class);
 		MessageWrapper instance = new MessageWrapper(message.getClass(), mapMsg);

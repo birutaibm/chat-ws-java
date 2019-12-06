@@ -32,7 +32,7 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class CreateApp implements Message {
-		private Long userId;
+		private Long admin;
 		private Long scenario;
 		private String name;
 		private Map<String, Integer> phases;
