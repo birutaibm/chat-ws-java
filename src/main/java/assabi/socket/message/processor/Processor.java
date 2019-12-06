@@ -76,6 +76,7 @@ public interface Processor<M extends Message> {
 		@Override
 		public void process(Message.CreateApp message, WebSocket connection, SocketServer server) {
 			String response = api.post("/applications", message.toJsonString());
+			System.out.println("Creating AppInfo from "+response);
 			server.getUserList().getFromConnection(connection).ifPresent(user -> {
 				try {
 					Message.AppInfo appInfo = Interpretator.mapper.readValue(response, Message.AppInfo.class);
