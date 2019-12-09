@@ -77,6 +77,11 @@
 	    	<artifactId>Assabi-HTTP-DTOs</artifactId>
 	    	<version>master-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13-rc-2</version>
+		</dependency>
     </dependencies>
 
 </project>
