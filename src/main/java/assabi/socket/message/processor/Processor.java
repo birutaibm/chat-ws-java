@@ -54,21 +54,27 @@ public interface Processor<M extends Message> {
 					UserList userList = server.getUserList();
 					Message.AppInfo appInfo = userList.getAppInfo(appId);
 					connection.send(Interpretator.write(appInfo));
+					String newActor = wrapNewActor(actorId, name);
+					connection.send(newActor);
 					
-					Message.NewActor newUser = new Message.NewActor();
-					newUser.setActorId(actorId);
-					newUser.setActorName(name);
-					String wrap = Interpretator.write(newUser);
 					
 					userList.getGroupUsers(appId, UserList.ADMIN_GROUP_ID)
 						.findFirst()
 						.map(User::getConnection)
-						.ifPresent(c -> c.send(wrap));
+						.ifPresent(c -> c.send(newActor));
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+
+		private String wrapNewActor(Long id, String name) throws IOException {
+			Message.NewActor newUser = new Message.NewActor();
+			newUser.setActorId(id);
+			newUser.setActorName(name);
+			String wrap = Interpretator.write(newUser);
+			return wrap;
 		}
 	}
 	
