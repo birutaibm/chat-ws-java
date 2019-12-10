@@ -46,7 +46,7 @@ public interface Message {
 		private String actorName;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
-	public class ParticipationIntesion implements Message {
+	public class ParticipationIntension implements Message {
 		private Long application;
 		private Long groupId;
 		private String groupName;
@@ -58,7 +58,7 @@ public interface Message {
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class ParticipationApproval implements Message {
 		private Long userId;
-		private List<Message.ParticipationIntesion> approve;
+		private List<Message.ParticipationIntension> approve;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class ParticipationApproved implements Message {

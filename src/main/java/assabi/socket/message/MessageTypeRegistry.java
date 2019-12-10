@@ -19,7 +19,7 @@ public final class MessageTypeRegistry {
 		registry(Message.NewActor.class);
 		registry(Message.ParticipationApproval.class);
 		registry(Message.ParticipationApproved.class);
-		registry(Message.ParticipationIntesion.class);
+		registry(Message.ParticipationIntension.class);
 		registry(Message.Waiting.class);
 		registry(Message.Weights.class);
 	}

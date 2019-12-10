@@ -96,9 +96,9 @@ public interface Processor<M extends Message> {
 		}
 	}
 	
-	public final class ParticipationIntesion implements Processor<Message.ParticipationIntesion> {
+	public final class ParticipationIntension implements Processor<Message.ParticipationIntension> {
 		@Override
-		public void process(Message.ParticipationIntesion message, WebSocket connection, SocketServer server) {
+		public void process(Message.ParticipationIntension message, WebSocket connection, SocketServer server) {
 			try {
 				String wrap = Interpretator.write(message);
 				server.getUserList().getGroupUsers(message.getApplication(), UserList.ADMIN_GROUP_ID)
@@ -119,9 +119,9 @@ public interface Processor<M extends Message> {
 			try {
 				String response = api.post("/participations", Interpretator.mapper.writeValueAsString(dtos));
 				HashMap<String, String> map = Interpretator.mapper.readValue(response, new HashMap<String, String>().getClass());
-				Map<Long, List<Message.ParticipationIntesion>> savedIntensionsByGroups = message
+				Map<Long, List<Message.ParticipationIntension>> savedIntensionsByGroups = message
 						.getApprove().stream()
-						.collect(Collectors.groupingBy(Message.ParticipationIntesion::getGroupId));
+						.collect(Collectors.groupingBy(Message.ParticipationIntension::getGroupId));
 				if (map.containsKey("fails")) {
 					List<ParticipationDTO> fails = (List<ParticipationDTO>) Interpretator.mapper.readValue(map.get("fails"), dtos.getClass());
 					fails.forEach(dto -> {
@@ -154,20 +154,20 @@ public interface Processor<M extends Message> {
 				}).collect(Collectors.toList());
 		}
 
-		private boolean sameInterpretation(ParticipationDTO dto, Message.ParticipationIntesion intension) {
+		private boolean sameInterpretation(ParticipationDTO dto, Message.ParticipationIntension intension) {
 			InterpretationDTO interpretation = dto.getInterpretation();
 			return (intension.getActorId() == interpretation.getActor()) &&
 					(intension.getCharacterId() == interpretation.getCharacter());
 		}
 
 		private void approveIntensions(SocketServer server, Map<Long, Long> savedMap,
-				List<Message.ParticipationIntesion> intensions) {
+				List<Message.ParticipationIntension> intensions) {
 			Map<String, String> participants = getGroupPaticipants(intensions);
 			intensions.stream().forEach(intension ->
 				apprveIntesion(server, savedMap, intension.getGroupId(), participants, intension));
 		}
 
-		private Map<String, String> getGroupPaticipants(List<Message.ParticipationIntesion> intensions) {
+		private Map<String, String> getGroupPaticipants(List<Message.ParticipationIntension> intensions) {
 			Map<String, String> participants = new HashMap<>();
 			intensions.forEach(intension ->
 				participants.put(intension.getActorName(), intension.getCharacterName()));
@@ -175,7 +175,7 @@ public interface Processor<M extends Message> {
 		}
 
 		private Message.ParticipationApproved apprveIntesion(SocketServer server, Map<Long, Long> savedMap, Long group,
-				Map<String, String> participants, Message.ParticipationIntesion intension) {
+				Map<String, String> participants, Message.ParticipationIntension intension) {
 			Message.ParticipationApproved approved = new Message.ParticipationApproved();
 			Long actorId = intension.getActorId();
 			approved.setGroupId(group);

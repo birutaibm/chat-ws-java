@@ -19,7 +19,7 @@ public class ProcessorRegistry {
         registry(Message.GroupChange.class, new Processor.GroupChange());
         registry(Message.Login.class, new Processor.Login());
         registry(Message.ParticipationApproval.class, new Processor.ParticipationApproval());
-        registry(Message.ParticipationIntesion.class, new Processor.ParticipationIntesion());
+        registry(Message.ParticipationIntension.class, new Processor.ParticipationIntension());
         registry(Message.Waiting.class, new Processor.Waiting());
         registry(Message.Weights.class, new Processor.Weights());
 	}
