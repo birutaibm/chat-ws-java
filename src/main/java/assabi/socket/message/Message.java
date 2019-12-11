@@ -57,7 +57,6 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class ParticipationApproval implements Message {
-		private Long userId;
 		private List<Message.ParticipationIntension> approve;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString

@@ -197,7 +197,7 @@ public interface Processor<M extends Message> {
 		}
 		
 		private Map<Long, Long> getActorParticipationIds(Map<String, ?> participation) {
-			Long participationId = (Long) participation.get("id");
+			Long participationId = ((Number) participation.get("id")).longValue();
 			Map<String, ?> interpretation = (Map<String, ?>) participation.get("interpretation");
 			Map<String, ?> actor = (Map<String, ?>) interpretation.get("actor");
 			Long actorId = ((Number) actor.get("id")).longValue();
