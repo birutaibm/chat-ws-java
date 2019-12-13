@@ -44,6 +44,7 @@ public class RestClient {
 	
 	private HttpURLConnection doPost(String endPoint, String body) {
 		try {
+			System.out.println("Posting "+body+" to "+endPoint);
 			HttpURLConnection conn = connect(endPoint);
 			conn.setDoOutput(true);
 			conn.getOutputStream().write(body.getBytes(Charset.forName("UTF-8")));

@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import assabi.dto.ParticipationDTO;
+import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.socket.message.Message.Login;
 
 public class InterpretatorTest {
@@ -21,6 +23,26 @@ public class InterpretatorTest {
 		} catch (IOException e) {
 			fail("throws IOException");
 		}
+	}
+
+	@Test
+	public void desserializedDTOIsEqualsOriginal() {
+		ParticipationDTO original = createDTO();
+		
+		try {
+			String str = Interpretator.mapper.writeValueAsString(original);
+			ParticipationDTO reconstructed = Interpretator.mapper.readValue(str, ParticipationDTO.class);
+			assertEquals(original, reconstructed);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("throws IOException");
+		}
+	}
+
+	private ParticipationDTO createDTO() {
+		InterpretationDTO interpretation = new InterpretationDTO(2L, 3L);
+		ParticipationDTO dto = new ParticipationDTO(1L, interpretation);
+		return dto;
 	}
 
 	private Message createMessage() {
