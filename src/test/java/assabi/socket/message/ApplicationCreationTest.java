@@ -14,8 +14,7 @@ public class ApplicationCreationTest {
 	@Test
 	public void createApplication() {
 		try {
-			String createApp = createAppMessage().toJsonString();
-			String strInfo = new RestClient().post("/applications", createApp);
+			String strInfo = new RestClient().post("/applications", createAppMessage());
 			System.out.println(strInfo);
 			Message.AppInfo appInfo = Interpretator.mapper.readValue(strInfo, Message.AppInfo.class);
 			System.out.println(Interpretator.write(appInfo));

@@ -7,8 +7,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import assabi.socket.message.Interpretator;
 import assabi.socket.message.Message;
 
 public class RestClient {
@@ -31,8 +37,18 @@ public class RestClient {
 		return false;
 	}
 
-	public String post(String endPoint, String body) {
+	public Map<String, ?> getMapFromPost(String endPoint, Object content) {
+		String response = post(endPoint, content);
 		try {
+			return Interpretator.mapper.readValue(response, new HashMap<String, Object>().getClass());
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public String post(String endPoint, Object content) {
+		try {
+			String body = Interpretator.mapper.writeValueAsString(content);
 			HttpURLConnection conn = doPost(endPoint, body);
 			return read(conn);
 		} catch (IOException e) {
@@ -84,14 +100,5 @@ public class RestClient {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public static void main(String[] args) {
-			Message.Login login = new Message.Login();
-			login.setLogin("solangegarcia@fearp.usp.br");
-			login.setPassword("1234");
-			String msgStr = login.toJsonString();
-			String response = new RestClient().post("/login", msgStr);
-			System.out.println(msgStr + " => " + response);
 	}
 }

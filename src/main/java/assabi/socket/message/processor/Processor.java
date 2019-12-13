@@ -34,8 +34,7 @@ public interface Processor<M extends Message> {
 		@Override
 		public void process(Message.Login message, WebSocket connection, SocketServer server) {
 			try {
-				String response = api.post("/login", message.toJsonString());
-				HashMap<String, Object> map = Interpretator.mapper.readValue(response, new HashMap<String, Object>().getClass());
+				Map<String, ?> map = api.getMapFromPost("/login", message);
 				String name = message.getLogin();
 				if (map.containsKey("adminId")) {
 					User user = new User(connection,
@@ -81,10 +80,10 @@ public interface Processor<M extends Message> {
 	public final class CreateApp implements Processor<Message.CreateApp> {
 		@Override
 		public void process(Message.CreateApp message, WebSocket connection, SocketServer server) {
-			String response = api.post("/applications", message.toJsonString());
-			System.out.println("Creating AppInfo from "+response);
 			server.getUserList().getFromConnection(connection).ifPresent(user -> {
 				try {
+					String response = api.post("/applications", message);
+					System.out.println("Creating AppInfo from "+response);
 					Message.AppInfo appInfo = Interpretator.mapper.readValue(response, Message.AppInfo.class);
 					server.getUserList().setAdmin(user, appInfo);
 					connection.send(Interpretator.write(appInfo));
@@ -117,7 +116,7 @@ public interface Processor<M extends Message> {
 		public void process(Message.ParticipationApproval message, WebSocket connection, SocketServer server) {
 			List<ParticipationDTO> dtos = approvedDTOs(message);
 			try {
-				String response = api.post("/participations", Interpretator.mapper.writeValueAsString(dtos));
+				String response = api.post("/participations", dtos);
 				HashMap<String, String> map = Interpretator.mapper.readValue(response, new HashMap<String, String>().getClass());
 				Map<Long, List<Message.ParticipationIntension>> savedIntensionsByGroups = message
 						.getApprove().stream()
@@ -231,15 +230,8 @@ public interface Processor<M extends Message> {
 		}
 
 		private Long postWeight(WeightCreationDTO weights) {
-			try {
-				String response = api.post("/weights", Interpretator.mapper.writeValueAsString(weights));
-				Map<String, ?> map = new HashMap<>();
-				map = Interpretator.mapper.readValue(response, map.getClass());
-				return ((Number) map.get("id")).longValue();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
+			Map<String, ?> map = api.getMapFromPost("/weights", weights);
+			return ((Number) map.get("id")).longValue();
 		}
 
 		private Message.Distances getDistance(long weight) {
@@ -305,11 +297,7 @@ public interface Processor<M extends Message> {
 		private Collection<?> postMixGroups(Message.GroupChange message)
 				throws JsonProcessingException, IOException, JsonParseException, JsonMappingException {
 			String endPoint = "applications/"+message.getAppId()+"/mix_groups";
-			Map<String, List<InterpretationDTO>> groups = message.getGroups();
-			String body = Interpretator.mapper.writeValueAsString(groups);
-			String response = api.post(endPoint, body);
-			Map<String, ?> phase = new HashMap<>();
-			phase = Interpretator.mapper.readValue(response, phase.getClass());
+			Map<String, ?> phase = api.getMapFromPost(endPoint, message.getGroups());
 			return (Collection<?>) phase.get("groups");
 		}
 

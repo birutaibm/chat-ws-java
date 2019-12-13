@@ -31,6 +31,7 @@ public class InterpretatorTest {
 		
 		try {
 			String str = Interpretator.mapper.writeValueAsString(original);
+			System.out.println(str);
 			ParticipationDTO reconstructed = Interpretator.mapper.readValue(str, ParticipationDTO.class);
 			assertEquals(original, reconstructed);
 		} catch (IOException e) {
