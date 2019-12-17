@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
 import assabi.dto.DistanceOptionDTO;
+import assabi.dto.LoteDTO;
 import assabi.dto.ParticipationDTO;
 import assabi.dto.ParticipationDTO.InterpretationDTO;
 import assabi.dto.WeightCreationDTO;
@@ -117,19 +118,16 @@ public interface Processor<M extends Message> {
 			List<ParticipationDTO> dtos = approvedDTOs(message);
 			try {
 				String response = api.post("/participations", dtos);
-				HashMap<String, String> map = Interpretator.mapper.readValue(response, new HashMap<String, String>().getClass());
+				LoteDTO<ParticipationDTO, Map<String, ?>> map = Interpretator.mapper.readValue(response, new LoteDTO<ParticipationDTO, Map<String, Object>>().getClass());
 				Map<Long, List<Message.ParticipationIntension>> savedIntensionsByGroups = message
 						.getApprove().stream()
 						.collect(Collectors.groupingBy(Message.ParticipationIntension::getGroupId));
-				if (map.containsKey("fails")) {
-					List<ParticipationDTO> fails = (List<ParticipationDTO>) Interpretator.mapper.readValue(map.get("fails"), dtos.getClass());
-					fails.forEach(dto -> {
+					map.getFails().forEach(dto -> {
 						Long group = dto.getGroup();
 						savedIntensionsByGroups.get(group)
 							.removeIf(intension -> sameInterpretation(dto, intension));
 					});
-				}
-				List<Map<String, ?>> savedParticipations = Interpretator.mapper.readValue(map.get("success"), List.class);
+				List<Map<String, ?>> savedParticipations = map.getSuccesses();
 				Map<Long, Long> actorToParticipationMap = savedParticipations.stream()
 					.map(this::getActorParticipationIds)
 					.flatMap(item -> item.entrySet().stream())
@@ -140,8 +138,6 @@ public interface Processor<M extends Message> {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			// FIXME implement this
-			throw new RuntimeException("Not yet impemented");
 		}
 
 		private List<ParticipationDTO> approvedDTOs(Message.ParticipationApproval message) {
@@ -290,8 +286,6 @@ public interface Processor<M extends Message> {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			// FIXME implement this
-			throw new RuntimeException("Not yet impemented");
 		}
 
 		private Collection<?> postMixGroups(Message.GroupChange message)
