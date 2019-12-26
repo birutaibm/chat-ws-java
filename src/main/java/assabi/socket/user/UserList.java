@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.java_websocket.WebSocket;
 
 import assabi.socket.message.Message.AppInfo;
+import assabi.socket.utils.PingPongThread;
 
 public class UserList {
 	public static final long ADMIN_GROUP_ID = 0L;
@@ -24,6 +25,7 @@ public class UserList {
 		fromConnection = new HashMap<>();
 		appUserGroups = new HashMap<>();
 		appInfos = new HashMap<>();
+		new PingPongThread(fromConnection::keySet);
 	}
 
 	public Optional<User> getFromId(Long id) {
