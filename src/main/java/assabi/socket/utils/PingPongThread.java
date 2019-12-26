@@ -2,6 +2,7 @@ package assabi.socket.utils;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.function.Supplier;
 
 import org.java_websocket.WebSocket;
@@ -10,7 +11,9 @@ import assabi.socket.message.Interpretator;
 import assabi.socket.message.Message;
 
 public class PingPongThread {
-	public class Ping implements Message {}
+	public class Ping extends HashMap<Object, Object> implements Message {
+		private static final long serialVersionUID = 1L;
+	}
 
 	private final Supplier<Collection<WebSocket>> connections;
 	private final String ping;
