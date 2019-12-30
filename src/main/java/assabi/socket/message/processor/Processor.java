@@ -23,6 +23,7 @@ import assabi.dto.WeightCreationDTO;
 import assabi.socket.SocketServer;
 import assabi.socket.message.Interpretator;
 import assabi.socket.message.Message;
+import assabi.socket.message.Message.Distances;
 import assabi.socket.restClient.RestClient;
 import assabi.socket.user.User;
 import assabi.socket.user.UserList;
@@ -219,10 +220,11 @@ public interface Processor<M extends Message> {
 	public final class ApproveWeights implements Processor<Message.ApproveWeights> {
 		@Override
 		public void process(Message.ApproveWeights message, WebSocket connection, SocketServer server) {
-			sendDistances(server,
-					getDistance(postWeight(message.getWeights())),
-					message.getUserId(),
-					message.getWeights().getGroup());
+			WeightCreationDTO weights = message.getWeights();
+			Distances distances = getDistance(postWeight(weights));
+			distances.setGroup(weights.getGroup());
+			distances.setStep(weights.getStep());
+			sendDistances(server, distances, message.getUserId());
 		}
 
 		private Long postWeight(WeightCreationDTO weights) {
@@ -244,8 +246,9 @@ public interface Processor<M extends Message> {
 			}
 		}
 
-		private void sendDistances(SocketServer server, Message.Distances distance, Long adminId, long groupId) {
+		private void sendDistances(SocketServer server, Message.Distances distance, Long adminId) {
 			try {
+				long groupId = distance.getGroup();
 				UserList userList = server.getUserList();
 				String wrap = Interpretator.write(distance);
 				userList.getAppsAdministratedBy(adminId)

@@ -79,6 +79,8 @@ public interface Message {
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
 	public class Distances implements Message {
+		private int step;
+		private long group;
 		private List<DistanceOptionDTO> distances;
 	}
 	@Getter @Setter @RequiredArgsConstructor @ToString
