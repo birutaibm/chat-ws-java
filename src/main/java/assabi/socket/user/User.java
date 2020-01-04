@@ -23,16 +23,19 @@ public class User {
     	private boolean needSend;
     	
 		public void consume(WebSocket connection) {
-			if (needSend)
+			if (needSend) {
 				connection.send(text);
+				needSend = false;
+			}
 			else
 				this.connection = connection;
-			needSend = false;
 		}
 
 		public void flush() {
-			if (connection != null)
+			if (connection != null) {
 				connection.send(text);
+				connection = null;
+			}
 			else
 				needSend = true;
 		}
